@@ -1,2 +1,2 @@
 # pnglatex
-pnglatex, a small program that converts latex snippets to png
+pnglatex, a small program that converts LaTeX snippets to png
