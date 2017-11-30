@@ -21,7 +21,6 @@ function which you can import and use in your own programs.
 """
 
 from subprocess import Popen, PIPE
-from os import remove
 from contextlib import contextmanager
 from pathlib import Path
 from secrets import token_hex
@@ -115,7 +114,11 @@ def pnglatex(tex_string, output=None):
     with _cleanup(jobname):
         status = _run(tex_string, jobname, output)
     if status != 0:
-        remove(output)
+        with Path(output) as o:
+            try:
+                o.unlink()
+            except FileNotFoundError:
+                pass
         raise ValueError("Failed to generate png file.")
 
 
@@ -123,7 +126,8 @@ def main():
     """
     Program entry point when ran as a script.
     """
-    raise NotImplementedError
+    # TODO: Implement this
+    pass
 
 
 if __name__ == '__main__':
