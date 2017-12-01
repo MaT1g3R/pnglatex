@@ -1,0 +1,4 @@
+build/
+dist/
+pnglatex.egg-info/
+venv/
