@@ -19,12 +19,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 This program can be run directly as a script. It also provides the pnglatex
 function which you can import and use in your own programs.
 """
-
+from sys import stderr
+from os import devnull
 from subprocess import Popen, PIPE
 from contextlib import contextmanager
 from pathlib import Path
 from secrets import token_hex
 from shutil import which
+from argparse import ArgumentParser
 
 
 __all__ = ['pnglatex']
@@ -78,24 +80,25 @@ def _cleanup(jobname):
         _cleanup_suffix(suf)
 
 
-def _run(tex_string, jobname, output):
+def _run(tex_string, jobname, output, null):
     """
     Run the tex string through some processes to produce a png at output.
 
     Returns the exit status of pnm2png
     """
     with Popen((_get_bin('pdflatex'), f'-jobname={jobname}'),
-               stdin=PIPE) as proc:
+               stdin=PIPE, stdout=null) as proc:
         proc.communicate(input=tex_string.encode(encoding='UTF-8'))
 
-    with Popen((_get_bin('pdfcrop'), f'{jobname}.pdf')) as crop:
+    with Popen((_get_bin('pdfcrop'), f'{jobname}.pdf'),
+               stdout=null, stderr=null) as crop:
         crop.wait()
 
     with open(output, 'wb+') as f,\
-        Popen((_get_bin('pdf2ppm'), f'{jobname}-crop.pdf'), stdout=PIPE)\
-        as pdf2ppm,\
-            Popen((_get_bin('pnm2png'),), stdin=pdf2ppm.stdout, stdout=f)\
-            as pnm2png:
+        Popen((_get_bin('pdf2ppm'), f'{jobname}-crop.pdf'),
+              stdout=PIPE, stderr=null) as pdf2ppm,\
+            Popen((_get_bin('pnm2png'),), stdin=pdf2ppm.stdout,
+                  stdout=f, stderr=null) as pnm2png:
         pnm2png.wait()
         status = pnm2png.poll()
     return status
@@ -117,8 +120,8 @@ def pnglatex(tex_string, output=None):
     jobname = _get_fname()
     output = output or jobname + '.png'
     tex_string = _TEX_BP.format(tex_string)
-    with _cleanup(jobname):
-        status = _run(tex_string, jobname, output)
+    with _cleanup(jobname), open(devnull, 'w') as null:
+        status = _run(tex_string, jobname, output, null)
     if status != 0:
         with Path(output) as o:
             try:
@@ -132,8 +135,16 @@ def main():
     """
     Program entry point when ran as a script.
     """
-    # TODO: Implement this
-    pass
+    des = 'pnglatex, a small program that converts latex snippets to png'
+    parser = ArgumentParser(description=des)
+    parser.add_argument('-c', help='The LaTeX string to convert',
+                        required=True, metavar='"LaTeX string"')
+    parser.add_argument('-o', help='The output filename.', metavar='filename')
+    args = parser.parse_args()
+    try:
+        pnglatex(args.c, args.o)
+    except ValueError as e:
+        print(e, file=stderr)
 
 
 if __name__ == '__main__':
