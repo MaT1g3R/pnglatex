@@ -23,5 +23,20 @@ setup(
     entry_points={
         'console_scripts': ['pnglatex = pnglatex.pnglatex:main']
     },
+    classifiers=[
+        'License :: OSI Approved :: '
+        'GNU General Public License v3 or later (GPLv3+)',
+        'Natural Language :: English',
+        'Operating System :: POSIX',
+        'Programming Language :: Python :: 3',
+        'Topic :: Text Processing :: Markup :: LaTeX',
+        'Topic :: Utilities',
+        'Topic :: Multimedia :: Graphics :: Graphics Conversion',
+        'Environment :: Console',
+        'Intended Audience :: Developers',
+        'Intended Audience :: End Users/Desktop',
+        'Intended Audience :: Education',
+        'Development Status :: 5 - Production/Stable'
+    ],
     **META
 )
