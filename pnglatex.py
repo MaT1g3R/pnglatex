@@ -32,6 +32,7 @@ from argparse import ArgumentParser
 __all__ = ['pnglatex']
 
 
+_BINARIES = ('pdflatex', 'pdfcrop', 'pdf2ppm', 'pnm2png')
 _TEX_BP = """\\documentclass{{article}}
 \\thispagestyle{{empty}}
 \\begin{{document}}
@@ -47,7 +48,7 @@ def _get_bin(name):
     if '2' in name and not res:
         res = which(name.replace('2', 'to'))
     if not res:
-        raise ValueError(f'Eexecutable {name} not found')
+        raise ValueError('Eexecutable {} not found'.format(name))
     return res
 
 
@@ -80,28 +81,28 @@ def _cleanup(jobname):
         _cleanup_suffix(suf)
 
 
-def _run(tex_string, jobname, output, null):
+def _run(tex_string, jobname, output, null, binaries):
     """
     Run the tex string through some processes to produce a png at output.
 
     Returns the exit status of pnm2png
     """
-    with Popen((_get_bin('pdflatex'), f'-jobname={jobname}'),
-               stdin=PIPE, stdout=null) as proc:
-        proc.communicate(input=tex_string.encode(encoding='UTF-8'))
+    pdflatex, pdfcrop, pdf2ppm, pnm2png = binaries
 
-    with Popen((_get_bin('pdfcrop'), f'{jobname}.pdf'),
-               stdout=null, stderr=null) as crop:
+    def popen(*args, stdin=None, out=null, err=null):
+        return Popen(args, stdin=stdin, stdout=out, stderr=err)
+
+    with popen(pdflatex, '-jobname=' + jobname, stdin=PIPE) as pdflatex_p:
+        pdflatex_p.communicate(input=tex_string.encode(encoding='UTF-8'))
+
+    with popen(pdfcrop, jobname + '.pdf') as crop:
         crop.wait()
 
     with open(output, 'wb+') as f,\
-        Popen((_get_bin('pdf2ppm'), f'{jobname}-crop.pdf'),
-              stdout=PIPE, stderr=null) as pdf2ppm,\
-            Popen((_get_bin('pnm2png'),), stdin=pdf2ppm.stdout,
-                  stdout=f, stderr=null) as pnm2png:
-        pnm2png.wait()
-        status = pnm2png.poll()
-    return status
+        popen(pdf2ppm, jobname + '-crop.pdf', out=PIPE) as ppm,\
+            popen(pnm2png, stdin=ppm.stdout, out=f) as png:
+        png.wait()
+        return png.poll()
 
 
 def pnglatex(tex_string, output=None):
@@ -121,8 +122,11 @@ def pnglatex(tex_string, output=None):
     jobname = _get_fname()
     output = output or jobname + '.png'
     tex_string = _TEX_BP.format(tex_string)
+    binaries = tuple(_get_bin(b) for b in _BINARIES)
+
     with _cleanup(jobname), open(devnull, 'w') as null:
-        status = _run(tex_string, jobname, output, null)
+        status = _run(tex_string, jobname, output, null, binaries)
+
     if status != 0:
         with Path(output) as o:
             try:
@@ -148,7 +152,7 @@ def main():
     except ValueError as e:
         print(e, file=stderr)
     else:
-        print(f'Success! Your file has been saved at {out}')
+        print('Success! Your file has been saved at {}'.format(out))
 
 
 if __name__ == '__main__':
