@@ -151,6 +151,7 @@ def main():
         out = pnglatex(args.c, args.o)
     except ValueError as e:
         print(e, file=stderr)
+        exit(1)
     else:
         print('Success! Your file has been saved at {}'.format(out))
 
