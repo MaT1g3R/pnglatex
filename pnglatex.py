@@ -93,8 +93,8 @@ def _run(tex_string, jobname, output):
 
     with open(output, 'wb+') as f,\
         Popen((_get_bin('pdf2ppm'), f'{jobname}-crop.pdf'), stdout=PIPE)\
-        as pdftoppm,\
-            Popen((_get_bin('pnm2png'),), stdin=pdftoppm.stdout, stdout=f)\
+        as pdf2ppm,\
+            Popen((_get_bin('pnm2png'),), stdin=pdf2ppm.stdout, stdout=f)\
             as pnm2png:
         pnm2png.wait()
         status = pnm2png.poll()
