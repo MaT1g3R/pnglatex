@@ -33,6 +33,11 @@ with (HERE / 'pnglatex' / '__init__.py').open() as init_file:
             name = 'name'
         META[name] = matched.group(2)
 
+
+with (HERE / 'README.md').open() as r:
+    README = r.read()
+
+
 setup(
     packages=find_packages(),
     entry_points={
@@ -40,6 +45,7 @@ setup(
     },
     package_data=PKGDATA,
     include_package_data=True,
+    long_description=README,
     classifiers=[
         'License :: OSI Approved :: '
         'GNU General Public License v3 or later (GPLv3+)',
