@@ -112,6 +112,7 @@ def pnglatex(tex_string, output=None):
     @param output: The output filename. It can also be a pathlib.Path object.
                    If not provided, this will be randomly generated.
 
+    @return: A Path object of the output file
     @raises ValueError: If the input is empty of something went wrong with
                         the image creation.
     """
@@ -129,6 +130,7 @@ def pnglatex(tex_string, output=None):
             except FileNotFoundError:
                 pass
         raise ValueError("Failed to generate png file.")
+    return Path(output)
 
 
 def main():
@@ -142,9 +144,11 @@ def main():
     parser.add_argument('-o', help='The output filename.', metavar='filename')
     args = parser.parse_args()
     try:
-        pnglatex(args.c, args.o)
+        out = pnglatex(args.c, args.o)
     except ValueError as e:
         print(e, file=stderr)
+    else:
+        print(f'Success! Your file has been saved at {out}')
 
 
 if __name__ == '__main__':
