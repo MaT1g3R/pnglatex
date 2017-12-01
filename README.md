@@ -9,6 +9,10 @@ A LaTeX distribution such as [TeX Live](https://www.tug.org/texlive/) or [MiKTeX
 
 `pdfcrop, pnmtopng, pdftoppm` You should be able to find those programs in your distro package manager or [Homebrew](https://brew.sh/)
 
+`pnmtopng` can be typically found in the package `netpbm`
+
+`pdftoppm` can be typically found in the package `poppler-utils`
+
 ## Install
 
 In your terminal, type:
