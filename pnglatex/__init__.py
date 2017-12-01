@@ -27,5 +27,6 @@ __licence__ = 'GPLv3+'
 __copyright__ = 'copyright 2017 Peijun Ma'
 __url__ = 'https://github.com/MaT1g3R/pnglatex'
 __description__ = 'A small program that converts latex snippets to png'
+__author_email__ = 'mat1g3r@gmail.com'
 
 __all__ = ['pnglatex']
