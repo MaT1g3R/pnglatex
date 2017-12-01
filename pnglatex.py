@@ -24,6 +24,8 @@ from subprocess import Popen, PIPE
 from contextlib import contextmanager
 from pathlib import Path
 from secrets import token_hex
+from shutil import which
+
 
 __all__ = ['pnglatex']
 
@@ -39,8 +41,12 @@ def _get_bin(name):
     """
     Get the executable name of a program based on different OS.
     """
-    # TODO: Implement this
-    return name
+    res = which(name)
+    if '2' in name and not res:
+        res = which(name.replace('2', 'to'))
+    if not res:
+        raise ValueError(f'Eexecutable {name} not found')
+    return res
 
 
 def _get_fname():
@@ -86,7 +92,7 @@ def _run(tex_string, jobname, output):
         crop.wait()
 
     with open(output, 'wb+') as f,\
-        Popen((_get_bin('pdftoppm'), f'{jobname}-crop.pdf'), stdout=PIPE)\
+        Popen((_get_bin('pdf2ppm'), f'{jobname}-crop.pdf'), stdout=PIPE)\
         as pdftoppm,\
             Popen((_get_bin('pnm2png'),), stdin=pdftoppm.stdout, stdout=f)\
             as pnm2png:
