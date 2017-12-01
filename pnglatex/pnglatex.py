@@ -23,10 +23,11 @@ from sys import stderr
 from os import devnull
 from subprocess import Popen, PIPE
 from contextlib import contextmanager
+from string import digits, ascii_letters
 from pathlib import Path
-from secrets import token_hex
 from shutil import which
 from argparse import ArgumentParser
+from random import choice
 
 
 __all__ = ['pnglatex']
@@ -56,7 +57,7 @@ def _get_fname():
     """
     Get a random file name that does not exist in the current directory.
     """
-    name = token_hex(6)
+    name = ''.join(choice(digits + ascii_letters) for _ in range(6))
     for f in Path('.').iterdir():
         if name in str(f):
             return _get_fname()

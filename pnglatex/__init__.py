@@ -22,7 +22,7 @@ from .pnglatex import pnglatex
 
 __author__ = 'Peijun Ma'
 __title__ = 'pnglatex'
-__version__ = '1.0'
+__version__ = '1.1'
 __licence__ = 'GPLv3+'
 __copyright__ = 'copyright 2017 Peijun Ma'
 __url__ = 'https://github.com/MaT1g3R/pnglatex'
